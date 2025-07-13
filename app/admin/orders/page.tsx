@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Check, Truck, PackageCheck, X } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Check, Truck, PackageCheck, X, Eye, CheckCircle, XCircle } from "lucide-react"
 
 interface Order {
   _id: string
@@ -14,7 +15,10 @@ interface Order {
   total: number
   status: string
   createdAt: string
-  paymentId?: string
+  paymentScreenshot?: string
+  paymentVerified: boolean
+  paymentVerifiedBy?: string
+  paymentVerifiedAt?: string
 }
 
 const STATUS = ["pending", "shipped", "delivered"]
@@ -23,6 +27,9 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null)
+  const [showScreenshotModal, setShowScreenshotModal] = useState(false)
+  const [verifyingOrder, setVerifyingOrder] = useState<string | null>(null)
 
   useEffect(() => {
     fetchOrders()
@@ -51,6 +58,33 @@ export default function AdminOrdersPage() {
       })
       if (res.ok) fetchOrders()
     } catch {}
+  }
+
+  const verifyPayment = async (orderId: string, action: "verify" | "reject") => {
+    setVerifyingOrder(orderId)
+    try {
+      const res = await fetch("/api/orders/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          adminId: "admin", // In a real app, get from auth context
+          action,
+        }),
+      })
+      if (res.ok) {
+        fetchOrders()
+      }
+    } catch (error) {
+      console.error("Error verifying payment:", error)
+    } finally {
+      setVerifyingOrder(null)
+    }
+  }
+
+  const viewScreenshot = (screenshotUrl: string) => {
+    setSelectedScreenshot(screenshotUrl)
+    setShowScreenshotModal(true)
   }
 
   return (
@@ -93,10 +127,21 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="p-2">₹{o.total}</td>
                       <td className="p-2">
-                        {o.paymentId ? (
-                          <Badge className="bg-green-500 text-white">Paid</Badge>
+                        {o.paymentScreenshot ? (
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-blue-500 text-white">Screenshot Uploaded</Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => viewScreenshot(o.paymentScreenshot!)}
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : o.paymentVerified ? (
+                          <Badge className="bg-green-500 text-white">Verified</Badge>
                         ) : (
-                          <Badge className="bg-red-500 text-white">Unpaid</Badge>
+                          <Badge className="bg-red-500 text-white">Pending</Badge>
                         )}
                       </td>
                       <td className="p-2">
@@ -104,6 +149,33 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="p-2">{new Date(o.createdAt).toLocaleString()}</td>
                       <td className="p-2 space-x-2">
+                        {/* Payment Verification */}
+                        {o.paymentScreenshot && !o.paymentVerified && (
+                          <div className="flex gap-1 mb-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 border-green-600 hover:bg-green-50"
+                              onClick={() => verifyPayment(o._id, "verify")}
+                              disabled={verifyingOrder === o._id}
+                            >
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Verify
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-600 hover:bg-red-50"
+                              onClick={() => verifyPayment(o._id, "reject")}
+                              disabled={verifyingOrder === o._id}
+                            >
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* Order Status */}
                         {STATUS.filter(s => s !== o.status).map(s => (
                           <Button key={s} size="sm" variant="outline" onClick={() => updateStatus(o._id, s)}>
                             {s === "shipped" && <Truck className="h-4 w-4" />}
@@ -120,6 +192,24 @@ export default function AdminOrdersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Screenshot Modal */}
+      <Dialog open={showScreenshotModal} onOpenChange={setShowScreenshotModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Payment Screenshot</DialogTitle>
+          </DialogHeader>
+          {selectedScreenshot && (
+            <div className="text-center">
+              <img
+                src={selectedScreenshot}
+                alt="Payment Screenshot"
+                className="max-w-full max-h-96 object-contain rounded-lg border"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

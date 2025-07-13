@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Crown, Check, Star, Gift, Truck, Shield, Zap } from "lucide-react"
 import { getCurrentUser, setCurrentUser, isPremiumMember } from "@/lib/auth"
-import { initiatePayment } from "@/lib/razorpay"
+import { createUPIOrder } from "@/lib/upi-payment"
 import { useToast } from "@/hooks/use-toast"
+import UPIPaymentModal from "@/components/upi-payment-modal"
 
 const MEMBERSHIP_PRICE = 299
 const MEMBERSHIP_DURATION_DAYS = 30
@@ -50,6 +51,8 @@ export default function MembershipPage() {
   const { toast } = useToast()
   const [user, setUser] = useState(getCurrentUser())
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null)
   const [isPremium, setIsPremium] = useState(false)
 
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function MembershipPage() {
     setIsProcessing(true)
 
     try {
-      await initiatePayment(
+      await createUPIOrder(
         MEMBERSHIP_PRICE,
         "Premium Membership - Luxury Perfumes",
         {
@@ -75,56 +78,25 @@ export default function MembershipPage() {
           email: user.email,
           phone: user.phone,
         },
-        user._id,
+        user._id?.toString() || "",
         "membership",
         {
           amount: MEMBERSHIP_PRICE,
-          duration_days: MEMBERSHIP_DURATION_DAYS,
+          duration_months: 12,
         },
-        (response) => {
-          // Payment successful and verified
-          console.log("Payment successful:", response)
-
-          // Update user to premium
-          const updatedUser = {
-            ...user,
-            isPremium: true,
-            membershipExpiry: new Date(
-              Date.now() + MEMBERSHIP_DURATION_DAYS * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          }
-
-          // Update in localStorage
-          setCurrentUser(updatedUser)
-          setUser(updatedUser)
-          setIsPremium(true)
-
-          // Update users array
-          const users = JSON.parse(localStorage.getItem("users") || "[]")
-          const userIndex = users.findIndex((u: any) => u._id === user._id)
-          if (userIndex !== -1) {
-            users[userIndex] = updatedUser
-            localStorage.setItem("users", JSON.stringify(users))
-          }
-
-          toast({
-            title: "Welcome to Premium!",
-            description: "Your premium membership has been activated successfully!",
-          })
-
+        (response: any) => {
+          // Order created successfully, show payment modal
+          console.log("Order created:", response)
+          setCurrentOrderId(response.orderId)
+          setShowPaymentModal(true)
           setIsProcessing(false)
-
-          // Redirect to store after a delay
-          setTimeout(() => {
-            window.location.href = "/store"
-          }, 2000)
         },
-        (error) => {
-          // Payment failed
-          console.error("Payment failed:", error)
+        (error: any) => {
+          // Order creation failed
+          console.error("Order creation failed:", error)
           toast({
-            title: "Payment Failed",
-            description: "There was an issue processing your payment. Please try again.",
+            title: "Payment Error",
+            description: "Unable to create membership order. Please try again.",
             variant: "destructive",
           })
           setIsProcessing(false)
@@ -139,6 +111,42 @@ export default function MembershipPage() {
       })
       setIsProcessing(false)
     }
+  }
+
+  const handlePaymentComplete = () => {
+    if (!user) return
+
+    // Update user to premium
+    const updatedUser = {
+      ...user,
+      isPremium: true,
+      membershipExpiry: new Date(
+        Date.now() + MEMBERSHIP_DURATION_DAYS * 24 * 60 * 60 * 1000,
+      ).toISOString(),
+    }
+
+    // Update in localStorage
+    setCurrentUser(updatedUser)
+    setUser(updatedUser)
+    setIsPremium(true)
+
+    // Update users array
+    const users = JSON.parse(localStorage.getItem("users") || "[]")
+    const userIndex = users.findIndex((u: any) => u._id === user._id)
+    if (userIndex !== -1) {
+      users[userIndex] = updatedUser
+      localStorage.setItem("users", JSON.stringify(users))
+    }
+
+    toast({
+      title: "Membership Order Placed!",
+      description: "Your membership order has been placed. We'll verify your payment and activate your premium status shortly.",
+    })
+
+    // Redirect to store after a delay
+    setTimeout(() => {
+      window.location.href = "/store"
+    }, 2000)
   }
 
   if (!user) {
@@ -320,13 +328,25 @@ export default function MembershipPage() {
                 )}
 
                 <div className="text-center">
-                  <p className="text-xs text-gray-500">Secure payment powered by Razorpay</p>
+                  <p className="text-xs text-gray-500">Secure payment via UPI QR Code</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* UPI Payment Modal */}
+      {currentOrderId && (
+        <UPIPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          amount={MEMBERSHIP_PRICE}
+          description="Premium Membership - Luxury Perfumes"
+          orderId={currentOrderId}
+          onPaymentComplete={handlePaymentComplete}
+        />
+      )}
     </div>
   )
 }

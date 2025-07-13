@@ -1,10 +1,10 @@
 import { getDatabase } from "@/lib/mongodb"
 import type { User, CreateUserData } from "@/lib/models/User"
-import { ObjectId } from "mongodb"
+import { ObjectId, type ModifyResult, type Collection } from "mongodb"
 import bcrypt from "bcryptjs"
 
 export class UserService {
-  private async getCollection() {
+  private async getCollection(): Promise<Collection<User>> {
     const db = await getDatabase()
     return db.collection<User>("users")
   }
@@ -69,7 +69,10 @@ export class UserService {
       { returnDocument: "after" },
     )
 
-    return result.value
+    if (!result || !(result as any).value) {
+      return null
+    }
+    return (result as any).value
   }
 
   async upgradeToPremium(id: string, membershipExpiry: Date): Promise<User | null> {
@@ -82,5 +85,17 @@ export class UserService {
   async getAllUsers(): Promise<User[]> {
     const collection = await this.getCollection()
     return await collection.find({}).toArray()
+  }
+
+  async getPremiumUsers(): Promise<User[]> {
+    const collection = await this.getCollection()
+    return await collection.find({ isPremium: true }).toArray()
+  }
+
+  async revokePremiumStatus(id: string): Promise<User | null> {
+    return await this.updateUser(id, {
+      isPremium: false,
+      membershipExpiry: undefined,
+    })
   }
 }

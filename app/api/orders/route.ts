@@ -1,39 +1,41 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { OrderService } from "@/lib/services/orderService"
-import { UserService } from "@/lib/services/userService"
 import { ObjectId } from "mongodb"
+import { OrderService } from "@/lib/services/orderService"
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get("userId")
-
     const orderService = new OrderService()
-    const userService = new UserService()
+    const orders = await orderService.getAllOrders()
 
-    let orders
-    if (userId) {
-      orders = await orderService.getOrdersByUserId(userId)
-    } else {
-      orders = await orderService.getAllOrders()
-    }
-
-    // Attach user info (name, email, phone) to each order
-    const userIds = Array.from(new Set(orders.map((o: any) => o.userId?.toString()).filter(Boolean)))
-    const users = userIds.length > 0 ? await userService.getAllUsers() : []
-    const userMap = Object.fromEntries(users.map((u: any) => [u._id?.toString(), u]))
-    orders = orders.map((o: any) => ({
-      ...o,
-      user: o.userId ? {
-        name: userMap[o.userId?.toString()]?.name || "",
-        email: userMap[o.userId?.toString()]?.email || "",
-        phone: userMap[o.userId?.toString()]?.phone || "",
-      } : {},
-    }))
+    // Populate user details for each order
+    const ordersWithUserDetails = await Promise.all(
+      orders.map(async (order) => {
+        const { UserService } = await import("@/lib/services/userService")
+        const userService = new UserService()
+        const user = await userService.getUserById(order.userId.toString())
+        
+        return {
+          _id: order._id,
+          user: user ? {
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+          } : null,
+          items: order.items,
+          total: order.total,
+          status: order.status,
+          createdAt: order.createdAt,
+          paymentScreenshot: order.paymentScreenshot,
+          paymentVerified: order.paymentVerified,
+          paymentVerifiedBy: order.paymentVerifiedBy,
+          paymentVerifiedAt: order.paymentVerifiedAt,
+        }
+      })
+    )
 
     return NextResponse.json({
       success: true,
-      orders,
+      orders: ordersWithUserDetails,
     })
   } catch (error) {
     console.error("Error fetching orders:", error)
@@ -44,7 +46,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { userId, items, subtotal, shipping, tax, total, shippingAddress, razorpayOrderId } = body
+    const { userId, items, subtotal, shipping, tax, total, shippingAddress } = body
 
     const orderService = new OrderService()
 
@@ -56,7 +58,6 @@ export async function POST(request: NextRequest) {
       tax,
       total,
       shippingAddress,
-      razorpayOrderId,
     })
 
     return NextResponse.json({
@@ -66,6 +67,30 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error creating order:", error)
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 })
+    // Return the error message in the response for debugging
+    return NextResponse.json({ error: "Failed to create order", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id, status } = body
+
+    const orderService = new OrderService()
+    const order = await orderService.updateOrderStatus(id, status)
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Order status updated successfully",
+      order,
+    })
+  } catch (error) {
+    console.error("Error updating order:", error)
+    return NextResponse.json({ error: "Failed to update order" }, { status: 500 })
   }
 }

@@ -19,9 +19,12 @@ export interface Order {
   shipping: number
   tax: number
   total: number
-  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled"
-  paymentId?: string
-  razorpayOrderId?: string
+  status: "pending" | "payment_pending" | "payment_verified" | "processing" | "shipped" | "delivered" | "cancelled"
+  paymentMethod: "upi_qr"
+  paymentScreenshot?: string // URL to uploaded screenshot
+  paymentVerified: boolean
+  paymentVerifiedBy?: string // Admin ID who verified
+  paymentVerifiedAt?: Date
   shippingAddress: {
     street: string
     city: string
@@ -47,5 +50,4 @@ export interface CreateOrderData {
     zipCode: string
     country: string
   }
-  razorpayOrderId?: string
 }

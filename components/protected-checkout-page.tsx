@@ -9,8 +9,9 @@ import { Separator } from "@/components/ui/separator"
 import { ShoppingCart, Clock, AlertCircle, CheckCircle, Store, MapPin, Crown, User } from "lucide-react"
 import { isStoreOpen } from "@/lib/store-hours"
 import { getCurrentUser, isPremiumMember } from "@/lib/auth"
-import { initiatePayment } from "@/lib/razorpay"
+import { createUPIOrder } from "@/lib/upi-payment"
 import { useToast } from "@/hooks/use-toast"
+import UPIPaymentModal from "@/components/upi-payment-modal"
 
 interface CartItem {
   id: string
@@ -33,6 +34,8 @@ export default function ProtectedCheckoutPage() {
   }>({ isOpen: true, message: "Checking store hours..." })
   const [isProcessingOrder, setIsProcessingOrder] = useState(false)
   const [userIsPremium, setUserIsPremium] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null)
 
   useEffect(() => {
     // Check authentication
@@ -102,7 +105,7 @@ export default function ProtectedCheckoutPage() {
     setIsProcessingOrder(true)
 
     try {
-      await initiatePayment(
+      await createUPIOrder(
         total,
         `Order from Luxury Perfumes - ${cartItems.length} items`,
         {
@@ -110,7 +113,7 @@ export default function ProtectedCheckoutPage() {
           email: user.email,
           phone: user.phone,
         },
-        user.id,
+        user._id?.toString() || "",
         "product",
         {
           items: cartItems,
@@ -120,32 +123,19 @@ export default function ProtectedCheckoutPage() {
           tax: tax,
           shipping_address: user.address,
         },
-        (response) => {
-          // Payment successful and verified
-          console.log("Payment successful:", response)
-
-          // Clear cart
-          localStorage.removeItem("cart")
-          setCartItems([])
-
-          toast({
-            title: "Order Placed Successfully!",
-            description: `Your order has been confirmed and will be delivered to ${user.address.city}, ${user.address.state}.`,
-          })
-
+        (response: any) => {
+          // Order created successfully, show payment modal
+          console.log("Order created:", response)
+          setCurrentOrderId(response.orderId)
+          setShowPaymentModal(true)
           setIsProcessingOrder(false)
-
-          // Redirect to order success page after delay
-          setTimeout(() => {
-            window.location.href = "/store"
-          }, 3000)
         },
-        (error) => {
-          // Payment failed
-          console.error("Payment failed:", error)
+        (error: any) => {
+          // Order creation failed
+          console.error("Order creation failed:", error)
           toast({
-            title: "Payment Failed",
-            description: "There was an error processing your payment. Please try again.",
+            title: "Order Failed",
+            description: "There was an error creating your order. Please try again.",
             variant: "destructive",
           })
           setIsProcessingOrder(false)
@@ -160,6 +150,22 @@ export default function ProtectedCheckoutPage() {
       })
       setIsProcessingOrder(false)
     }
+  }
+
+  const handlePaymentComplete = () => {
+    // Clear cart
+    localStorage.removeItem("cart")
+    setCartItems([])
+
+    toast({
+      title: "Order Placed Successfully!",
+      description: `Your order has been placed and payment screenshot uploaded. We'll verify and process it shortly.`,
+    })
+
+    // Redirect to store after a delay
+    setTimeout(() => {
+      window.location.href = "/store"
+    }, 3000)
   }
 
   if (!user) {
@@ -377,7 +383,7 @@ export default function ProtectedCheckoutPage() {
                       </Button>
 
                       <div className="text-center">
-                        <p className="text-xs text-gray-500">Secure payment powered by Razorpay</p>
+                        <p className="text-xs text-gray-500">Secure payment via UPI QR Code</p>
                       </div>
                     </>
                   )}
@@ -387,6 +393,18 @@ export default function ProtectedCheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* UPI Payment Modal */}
+      {currentOrderId && (
+        <UPIPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          amount={total}
+          description={`Order from Luxury Perfumes - ${cartItems.length} items`}
+          orderId={currentOrderId}
+          onPaymentComplete={handlePaymentComplete}
+        />
+      )}
     </div>
   )
 }

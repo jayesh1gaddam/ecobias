@@ -56,6 +56,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </Button>
             </Link>
           </nav>
+          <nav className="mb-6">
+            <ul className="flex flex-wrap gap-4 text-sm">
+              <li><a href="/admin/products" className="hover:underline">Products</a></li>
+              <li><a href="/admin/orders" className="hover:underline">Orders</a></li>
+              <li><a href="/admin/analytics" className="hover:underline">Analytics</a></li>
+              <li><a href="/admin/premium-users" className="hover:underline">Premium Users</a></li>
+              <li><a href="/admin/settings" className="hover:underline">Settings</a></li>
+            </ul>
+          </nav>
         </div>
 
         {/* Main Content */}

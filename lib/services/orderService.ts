@@ -14,7 +14,9 @@ export class OrderService {
     const order: Omit<Order, "_id"> = {
       ...orderData,
       orderNumber: this.generateOrderNumber(),
-      status: "pending",
+      status: "payment_pending",
+      paymentMethod: "upi_qr",
+      paymentVerified: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -41,16 +43,12 @@ export class OrderService {
     return await collection.find({}).sort({ createdAt: -1 }).toArray()
   }
 
-  async updateOrderStatus(id: string, status: Order["status"], paymentId?: string): Promise<Order | null> {
+  async updateOrderStatus(id: string, status: Order["status"]): Promise<Order | null> {
     const collection = await this.getCollection()
 
     const updateData: any = {
       status,
       updatedAt: new Date(),
-    }
-
-    if (paymentId) {
-      updateData.paymentId = paymentId
     }
 
     const result = await collection.findOneAndUpdate(
@@ -59,25 +57,77 @@ export class OrderService {
       { returnDocument: "after" },
     )
 
-    return result.value
+    if (!result || !(result as any).value) {
+      return null
+    }
+    return (result as any).value
   }
 
-  async updateOrderPayment(razorpayOrderId: string, paymentId: string, status: Order["status"]): Promise<Order | null> {
+  async uploadPaymentScreenshot(orderId: string, screenshotUrl: string): Promise<Order | null> {
     const collection = await this.getCollection()
 
     const result = await collection.findOneAndUpdate(
-      { razorpayOrderId },
+      { _id: new ObjectId(orderId) },
       {
         $set: {
-          paymentId,
-          status,
+          paymentScreenshot: screenshotUrl,
+          status: "pending", // Change to pending for admin verification
           updatedAt: new Date(),
         },
       },
       { returnDocument: "after" },
     )
 
-    return result.value
+    if (!result || !(result as any).value) {
+      return null
+    }
+    return (result as any).value
+  }
+
+  async verifyPayment(orderId: string, adminId: string): Promise<Order | null> {
+    const collection = await this.getCollection()
+
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(orderId) },
+      {
+        $set: {
+          paymentVerified: true,
+          paymentVerifiedBy: adminId,
+          paymentVerifiedAt: new Date(),
+          status: "payment_verified",
+          updatedAt: new Date(),
+        },
+      },
+      { returnDocument: "after" },
+    )
+
+    if (!result || !(result as any).value) {
+      return null
+    }
+    return (result as any).value
+  }
+
+  async rejectPayment(orderId: string, adminId: string): Promise<Order | null> {
+    const collection = await this.getCollection()
+
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(orderId) },
+      {
+        $set: {
+          paymentVerified: false,
+          paymentVerifiedBy: adminId,
+          paymentVerifiedAt: new Date(),
+          status: "payment_pending",
+          updatedAt: new Date(),
+        },
+      },
+      { returnDocument: "after" },
+    )
+
+    if (!result || !(result as any).value) {
+      return null
+    }
+    return (result as any).value
   }
 
   private generateOrderNumber(): string {
