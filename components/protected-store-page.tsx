@@ -23,6 +23,9 @@ import {
   Crown,
   LogOut,
   User,
+  Percent,
+  Clock,
+  Truck,
 } from "lucide-react"
 import { isStoreOpen } from "@/lib/store-hours"
 import StoreStatusWidget from "@/components/store-status-widget"
@@ -393,6 +396,75 @@ export default function ProtectedStorePage() {
           </div>
         </div>
       </section>
+
+      {/* Membership Benefits Section */}
+      {!userIsPremium && (
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 py-16">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Crown className="h-8 w-8 text-yellow-500" />
+                <h2 className="text-3xl font-bold text-gray-900">Membership Benefits</h2>
+              </div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                and get the discount on this order itself.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                    <Percent className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">BIG DISCOUNTS</h3>
+                </div>
+                <p className="text-gray-600">Save big on ALL products every day. Why wait for a sale?</p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                    <Truck className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">FREE DELIVERY</h3>
+                </div>
+                <p className="text-gray-600">Our shipping charges are on us.</p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                    <Star className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">EARLY ACCESS</h3>
+                </div>
+                <p className="text-gray-600">Get your hands on select products and designs before others do.</p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                    <Clock className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">PRIORITISED SHIPPING</h3>
+                </div>
+                <p className="text-gray-600">We ship your orders before everyone else's.</p>
+              </div>
+            </div>
+
+            <div className="text-center mt-8">
+              <Button
+                size="lg"
+                onClick={() => (window.location.href = "/membership")}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4 text-lg rounded-lg shadow-lg hover:scale-105 transition-transform"
+              >
+                BECOME A MEMBER
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Featured Collections */}
       <div className="bg-white py-16">

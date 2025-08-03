@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Crown, Check, Star, Gift, Truck, Shield, Zap } from "lucide-react"
+import { Crown, Check, Star, Gift, Truck, Shield, Zap, Percent, Clock, Package } from "lucide-react"
 import { getCurrentUser, setCurrentUser, isPremiumMember } from "@/lib/auth"
 import { createUPIOrder } from "@/lib/upi-payment"
 import { useToast } from "@/hooks/use-toast"
@@ -16,34 +16,34 @@ const MEMBERSHIP_DURATION_DAYS = 30
 
 const PREMIUM_BENEFITS = [
   {
+    icon: Percent,
+    title: "Big Discounts",
+    description: "Save big on ALL products every day. Why wait for a sale?",
+  },
+  {
+    icon: Truck,
+    title: "Free Delivery",
+    description: "Our shipping charges are on us.",
+  },
+  {
+    icon: Star,
+    title: "Early Access",
+    description: "Get your hands on select products and designs before others do.",
+  },
+  {
+    icon: Clock,
+    title: "Prioritised Shipping",
+    description: "We ship your orders before everyone else's.",
+  },
+  {
     icon: Crown,
     title: "Exclusive Premium Products",
     description: "Access to limited edition and premium fragrances not available to regular users",
   },
   {
-    icon: Star,
-    title: "Priority Customer Support",
-    description: "Get priority support with dedicated customer service for premium members",
-  },
-  {
-    icon: Truck,
-    title: "Free Express Delivery",
-    description: "Enjoy free express delivery on all orders with faster shipping times",
-  },
-  {
-    icon: Gift,
-    title: "Early Access to Sales",
-    description: "Get early access to sales, new launches, and special member-only discounts",
-  },
-  {
     icon: Shield,
     title: "Extended Return Policy",
     description: "Extended 30-day return policy instead of the standard 15-day policy",
-  },
-  {
-    icon: Zap,
-    title: "Member-Only Events",
-    description: "Invitations to exclusive fragrance events and product launch parties",
   },
 ]
 
