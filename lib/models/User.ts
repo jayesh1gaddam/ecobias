@@ -15,6 +15,13 @@ export interface User {
     zipCode: string
     country: string
   }
+  // Precise location captured at registration time
+  userLocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+    capturedAt?: Date
+  }
   role: "user" | "admin"
   createdAt: Date
   updatedAt: Date
@@ -31,6 +38,12 @@ export interface CreateUserData {
     state: string
     zipCode: string
     country: string
+  }
+  userLocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+    capturedAt?: Date
   }
   role?: "user" | "admin"
 }

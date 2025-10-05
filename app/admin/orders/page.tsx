@@ -26,6 +26,12 @@ interface Order {
     zipCode: string
     country: string
   }
+  orderLocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+    capturedAt?: string
+  }
 }
 
 const STATUS = ["pending", "shipped", "delivered"]
@@ -115,6 +121,7 @@ export default function AdminOrdersPage() {
                   <th className="p-2">Items</th>
                   <th className="p-2">Total</th>
                   <th className="p-2">Payment</th>
+                  <th className="p-2">Location</th>
                   <th className="p-2">Status</th>
                   <th className="p-2">Created</th>
                   <th className="p-2">Actions</th>
@@ -160,9 +167,26 @@ export default function AdminOrdersPage() {
                         <Badge className="bg-red-500 text-white">Pending</Badge>
                       )}
                     </td>
-                    <td className="p-2">
+                      <td className="p-2">
                       <Badge className="bg-[var(--color-accent)] text-white">{o.status}</Badge>
                     </td>
+                      <td className="p-2">
+                        {o.orderLocation ? (
+                          <div className="text-xs text-gray-700">
+                            <div>{o.orderLocation.latitude.toFixed(5)}, {o.orderLocation.longitude.toFixed(5)}</div>
+                            {o.orderLocation.accuracy !== undefined && <div>±{Math.round(o.orderLocation.accuracy)} m</div>}
+                            {o.orderLocation.capturedAt && <div>{new Date(o.orderLocation.capturedAt).toLocaleString()}</div>}
+                            <a
+                              href={`https://www.google.com/maps?q=${o.orderLocation.latitude},${o.orderLocation.longitude}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >Open in Maps</a>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
                     <td className="p-2">{new Date(o.createdAt).toLocaleString()}</td>
                     <td className="p-2 space-x-2">
                       {/* Payment Verification */}

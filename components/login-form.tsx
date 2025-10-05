@@ -31,6 +31,12 @@ interface RegisterFormData {
     zipCode: string
     country: string
   }
+  userLocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+    capturedAt?: string
+  }
 }
 
 export default function LoginForm() {
@@ -54,6 +60,7 @@ export default function LoginForm() {
       zipCode: "",
       country: "India",
     },
+    userLocation: undefined,
   })
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -121,6 +128,31 @@ export default function LoginForm() {
 
     setIsLoading(true)
 
+    // Capture geolocation before sending
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error("Geolocation not supported"))
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
+      })
+      setRegisterData((prev) => ({
+        ...prev,
+        userLocation: {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+          capturedAt: new Date().toISOString(),
+        },
+      }))
+    } catch (err) {
+      setIsLoading(false)
+      toast({
+        title: "Location Required",
+        description: "Please allow location access to register.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -133,6 +165,7 @@ export default function LoginForm() {
           phone: registerData.phone,
           password: registerData.password,
           address: registerData.address,
+          userLocation: registerData.userLocation,
         }),
       })
 

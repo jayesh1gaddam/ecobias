@@ -18,6 +18,12 @@ interface UserItem {
     accuracy?: number
     capturedAt?: string
   } | null
+  userLocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+    capturedAt?: string
+  } | null
 }
 
 export default function AdminUsersPage() {
@@ -59,6 +65,7 @@ export default function AdminUsersPage() {
                     <th className="p-2">Role</th>
                     <th className="p-2">Premium</th>
                     <th className="p-2">Latest Order Location</th>
+                    <th className="p-2">Registration Location</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -93,6 +100,29 @@ export default function AdminUsersPage() {
                             )}
                             <a
                               href={`https://www.google.com/maps?q=${u.latestOrderLocation.latitude},${u.latestOrderLocation.longitude}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              Open in Maps
+                            </a>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">No data</span>
+                        )}
+                      </td>
+                      <td className="p-2">
+                        {u.userLocation ? (
+                          <div className="text-xs text-gray-700">
+                            <div className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {u.userLocation.latitude.toFixed(5)}, {u.userLocation.longitude.toFixed(5)}</div>
+                            {u.userLocation.accuracy !== undefined && (
+                              <div>±{Math.round(u.userLocation.accuracy)} m</div>
+                            )}
+                            {u.userLocation.capturedAt && (
+                              <div>{new Date(u.userLocation.capturedAt).toLocaleString()}</div>
+                            )}
+                            <a
+                              href={`https://www.google.com/maps?q=${u.userLocation.latitude},${u.userLocation.longitude}`}
                               target="_blank"
                               rel="noreferrer"
                               className="text-blue-600 hover:underline"

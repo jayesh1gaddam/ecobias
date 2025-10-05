@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       return {
         ...rest,
         latestOrderLocation: userIdToLocation[u._id?.toString()]?.orderLocation || null,
+        userLocation: u.userLocation || null,
       }
     })
 
