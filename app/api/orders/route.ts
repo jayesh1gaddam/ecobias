@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { userId, items, subtotal, shipping, tax, total, shippingAddress } = body
+    const { userId, items, subtotal, shipping, tax, total, shippingAddress, orderLocation } = body
 
     // Require a valid shipping address for all orders (product or membership)
     if (!shippingAddress ||
@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       tax,
       total,
       shippingAddress,
+      orderLocation,
     })
 
     return NextResponse.json({
