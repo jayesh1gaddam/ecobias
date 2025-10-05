@@ -167,10 +167,7 @@ export default function AdminOrdersPage() {
                         <Badge className="bg-red-500 text-white">Pending</Badge>
                       )}
                     </td>
-                      <td className="p-2">
-                      <Badge className="bg-[var(--color-accent)] text-white">{o.status}</Badge>
-                    </td>
-                      <td className="p-2">
+                    <td className="p-2">
                         {o.orderLocation ? (
                           <div className="text-xs text-gray-700">
                             <div>{o.orderLocation.latitude.toFixed(5)}, {o.orderLocation.longitude.toFixed(5)}</div>
@@ -187,6 +184,9 @@ export default function AdminOrdersPage() {
                           <span className="text-gray-400">-</span>
                         )}
                       </td>
+                    <td className="p-2">
+                      <Badge className="bg-[var(--color-accent)] text-white">{o.status}</Badge>
+                    </td>
                     <td className="p-2">{new Date(o.createdAt).toLocaleString()}</td>
                     <td className="p-2 space-x-2">
                       {/* Payment Verification */}
