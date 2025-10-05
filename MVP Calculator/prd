@@ -1,0 +1,179 @@
+📑 Product Requirement Document (PRD) – MVP Cost Calculator
+1. Overview
+
+The MVP Cost Calculator is a founder-facing web tool that helps non-tech founders estimate the time and cost of building their Minimum Viable Product (MVP).
+
+🎯 Primary Goal: Generate qualified leads for Mati Studios by educating founders about realistic MVP costs and timelines.
+
+📈 Secondary Goal: Standardize internal scoping → quick, consistent proposals.
+
+🧑‍💻 Target Users: Non-tech founders (startup, SMBs, solopreneurs) exploring branding, UI/UX, or MVP builds.
+
+2. User Personas
+
+Early-stage Founder (Main Persona)
+
+Wants clarity on costs before approaching agencies.
+
+Needs transparent breakdown (branding, UX, dev, infra).
+
+May not know technical jargon.
+
+Investor/Accelerator Associate
+
+Helping portfolio founders plan budget.
+
+Needs credibility and confidence in numbers.
+
+Internal Mati Team
+
+Use calculator to scope inbound leads faster.
+
+Export/share structured estimates directly into proposals.
+
+3. Core Features
+Step 1: Basic Inputs
+
+Industry / vertical (dropdown e.g., social, e-commerce, edtech, fintech, healthtech).
+
+Type of MVP (options: App, Website, SaaS tool, Social platform, Marketplace, Content platform).
+
+Platform(s) (Web, iOS, Android, All).
+
+Branding requirement (Yes/No).
+
+Social media setup (Yes/No).
+
+Step 2: Feature Selection
+
+Common feature library with checkboxes:
+
+Authentication (Email, Google, Social logins)
+
+Profiles (User, Business, Admin)
+
+Payments (Stripe/Razorpay/Subscriptions)
+
+Content (Video upload, Streaming [Livepeer/Mux], Feed, Chat)
+
+Marketplace (Listings, Orders, Reviews)
+
+Analytics Dashboard
+
+Notifications (Email, Push)
+
+Integrations (CRM, AI API, etc.)
+
+Each feature has an estimated effort score (complexity weight).
+
+Step 3: Output – Cost & Timeline
+
+Total Timeline (weeks, based on team of 4 with AI-assisted coding).
+
+Cost Range (low/high, based on package pricing).
+
+Breakdown by: Branding, UI/UX, Build, Infra (infra shown separately as recurring).
+
+Step 4: Infra Costs (External SaaS)
+
+Supabase DB (₹1.5–3k/mo)
+
+Livepeer video streaming (usage-based)
+
+Vercel hosting (₹1–10k/mo depending on plan)
+
+Razorpay (2–3% per transaction)
+
+Optional: Cloudflare, SendGrid, Analytics
+
+Step 5: Lead Gen & Export
+
+Email capture to view detailed PDF report.
+
+PDF/Email Report includes:
+
+Chosen features + costs
+
+Timeline roadmap (Week 1–6/8)
+
+Infra notes
+
+CTA → “Book a free Founder Consultation with Mati Studios”
+
+Admin backend: log of all calculations (for lead funnel).
+
+4. UX & Flow (Founder Journey)
+
+Landing Page: “Estimate your MVP cost in 2 minutes”.
+
+Step-by-step quiz-like flow (multi-step form with progress bar).
+
+Result Page: Clean, professional estimate with breakdown.
+
+Email Gate: User enters email → full PDF sent, auto-tagged in CRM.
+
+Next Step CTA: “Book Consultation” button → Calendly/Notion booking.
+
+5. Non-Functional Requirements
+
+Performance: Results under 2s, lightweight UI.
+Scalability: Feature weights/config should be editable via admin (for future).
+SEO Optimized Landing Page: "MVP Calculator", "MVP Cost Estimator", "Startup MVP budget tool".
+Note: React SPA requires proper meta tag management, sitemap generation, and potentially SSR/SSG for better SEO performance.
+Branding: Matches Mati Studios brand (premium + founder-friendly).
+Security: Email capture stored securely in CRM (HubSpot/Notion/Google Sheets).
+
+6. Tech Stack Recommendation
+
+Frontend: React + TailwindCSS (component-based, performant, widely adopted).
+Backend/Logic: Node.js + Express or Supabase (storing user configs).
+Infra: Vercel hosting or Netlify.
+Database: Supabase (to log leads + configs).
+Email/CRM: Notion DB integration / HubSpot Free / Zapier + Gmail.
+PDF Generation: serverless function with Puppeteer/React-PDF.
+Analytics: GA4 + Mixpanel (track conversions).
+Build Tool: Vite (fast development and build times).
+State Management: React Context or Zustand (lightweight state management).
+Routing: React Router (client-side routing for SPA).
+
+7. Timeline (Development)
+Phase	Tasks	Duration
+Week 1	UX Wireframe, UI design in Figma, Define feature weights, Landing Page design, React project setup with Vite	1 week
+Week 2	Build React components for form flow, inputs + feature selection, base cost logic, implement React Router	1 week
+Week 3	Output screen components, infra costs display, PDF generator integration, email gate with React forms	1 week
+Week 4	Testing, SEO setup for SPA, launch, marketing page, performance optimization	1 week
+
+Total Time: 4 weeks (team of 2–3 with AI coding; parallel design + dev).
+Note: React SPA approach may require additional SEO considerations (meta tags, sitemap, etc.).
+
+8. Monetization / Strategic Angle
+
+Free tool → lead magnet (SEO + social funnel).
+
+Premium version (Phase 2): Founders can adjust infra assumptions (video hours, # of users, storage) for more accurate estimates.
+
+Agency leverage: Every estimate flows into pipeline → Mati team uses same logic for proposals → consistent pricing.
+
+9. Success Metrics (KPIs)
+
+1,000 calculator uses in first 90 days.
+
+20% conversion from calculator → email capture.
+
+10% conversion from leads → discovery call.
+
+At least 2 closed projects via calculator in first 3 months.
+
+10. Risks & Mitigations
+
+Risk: Founders may perceive costs as “too high”.
+
+Mitigation: Positioning = “transparent founder pricing”, show infra costs separately.
+
+Risk: Overly simplified results → misaligned expectations.
+
+Mitigation: Add disclaimer + CTA for tailored consultation.
+
+Risk: SEO competition.
+
+Mitigation: Target long-tail keywords (“MVP cost in India”, “Startup MVP cost 2025”, etc.).

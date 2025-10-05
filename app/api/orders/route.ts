@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
           total: order.total,
           status: order.status,
           createdAt: order.createdAt,
+          shippingAddress: order.shippingAddress,
           paymentScreenshot: order.paymentScreenshot,
           paymentVerified: order.paymentVerified,
           paymentVerifiedBy: order.paymentVerifiedBy,
