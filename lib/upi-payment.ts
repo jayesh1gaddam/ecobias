@@ -106,7 +106,7 @@ export async function uploadPaymentScreenshot(
 export const UPI_QR_CODE_DATA = {
   upiId: "jayeshgaddam123@okicici", // Updated to your actual UPI ID
   name: "Jayesh Gaddam",
-  qrCodeUrl: "/images/upi-qr-code.png", // Updated to your actual QR code image
+  qrCodeUrl: "/images/new_payment_qr.jpg", // Updated to new payment QR image
 }
 
 export function generateUPIQRCode(amount: number, description: string): string {
