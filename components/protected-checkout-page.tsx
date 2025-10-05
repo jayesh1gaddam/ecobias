@@ -102,6 +102,17 @@ export default function ProtectedCheckoutPage() {
       return
     }
 
+    // Validate address exists
+    const addr = (user as any).address
+    if (!addr || !addr.street || !addr.city || !addr.state || !addr.zipCode || !addr.country) {
+      toast({
+        title: "Address Required",
+        description: "Please add your delivery address in your profile before placing an order.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsProcessingOrder(true)
 
     try {
@@ -133,7 +144,7 @@ export default function ProtectedCheckoutPage() {
           subtotal: subtotal,
           shipping: shipping,
           tax: tax,
-          shipping_address: user.address,
+          shipping_address: addr,
           order_location: geoPosition.latitude !== undefined && geoPosition.longitude !== undefined ? {
             latitude: geoPosition.latitude,
             longitude: geoPosition.longitude,

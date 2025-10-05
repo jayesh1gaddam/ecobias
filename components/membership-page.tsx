@@ -70,6 +70,17 @@ export default function MembershipPage() {
     setIsProcessing(true)
 
     try {
+      // Require address to proceed
+      const addr = (user as any).address
+      if (!addr || !addr.street || !addr.city || !addr.state || !addr.zipCode || !addr.country) {
+        setIsProcessing(false)
+        toast({
+          title: "Address Required",
+          description: "Please add your delivery address in your profile before purchasing membership.",
+          variant: "destructive",
+        })
+        return
+      }
       await createUPIOrder(
         MEMBERSHIP_PRICE,
         "Premium Membership - Luxury Perfumes",
@@ -83,6 +94,7 @@ export default function MembershipPage() {
         {
           amount: MEMBERSHIP_PRICE,
           duration_months: 12,
+          shipping_address: addr,
         },
         (response: any) => {
           // Order created successfully, show payment modal

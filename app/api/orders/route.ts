@@ -49,6 +49,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { userId, items, subtotal, shipping, tax, total, shippingAddress } = body
 
+    // Require a valid shipping address for all orders (product or membership)
+    if (!shippingAddress ||
+        typeof shippingAddress.street !== "string" || shippingAddress.street.trim() === "" ||
+        typeof shippingAddress.city !== "string" || shippingAddress.city.trim() === "" ||
+        typeof shippingAddress.state !== "string" || shippingAddress.state.trim() === "" ||
+        typeof shippingAddress.zipCode !== "string" || shippingAddress.zipCode.trim() === "" ||
+        typeof shippingAddress.country !== "string" || shippingAddress.country.trim() === "") {
+      return NextResponse.json({ error: "Shipping address is required" }, { status: 400 })
+    }
+
     const orderService = new OrderService()
 
     const order = await orderService.createOrder({
