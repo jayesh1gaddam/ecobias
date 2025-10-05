@@ -55,6 +55,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 Analytics
               </Button>
             </Link>
+            <Link href="/admin/users">
+              <Button variant="ghost" className="w-full justify-start">
+                <Users className="h-4 w-4 mr-2" />
+                Users
+              </Button>
+            </Link>
           </nav>
           <nav className="mb-6">
             <ul className="flex flex-wrap gap-4 text-sm">
@@ -63,6 +69,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <li><a href="/admin/analytics" className="hover:underline">Analytics</a></li>
               <li><a href="/admin/premium-users" className="hover:underline">Premium Users</a></li>
               <li><a href="/admin/settings" className="hover:underline">Settings</a></li>
+              <li><a href="/admin/users" className="hover:underline">Users</a></li>
             </ul>
           </nav>
         </div>

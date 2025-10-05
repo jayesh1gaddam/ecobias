@@ -169,7 +169,7 @@ export default function AdminOrdersPage() {
                       <td className="p-2">{new Date(o.createdAt).toLocaleString()}</td>
                       <td className="p-2 space-x-2">
                         {/* Payment Verification */}
-                        {o.paymentScreenshot && !o.paymentVerified && (
+                        {(!o.paymentVerified) && (
                           <div className="flex gap-1 mb-2">
                             <Button
                               size="sm"
@@ -179,7 +179,7 @@ export default function AdminOrdersPage() {
                               disabled={verifyingOrder === o._id}
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
-                              Verify
+                              Approve
                             </Button>
                             <Button
                               size="sm"

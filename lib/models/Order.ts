@@ -32,6 +32,13 @@ export interface Order {
     zipCode: string
     country: string
   }
+  // Optional precise location captured at order placement time
+  orderLocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+    capturedAt?: Date
+  }
   createdAt: Date
   updatedAt: Date
 }
@@ -49,5 +56,11 @@ export interface CreateOrderData {
     state: string
     zipCode: string
     country: string
+  }
+  orderLocation?: {
+    latitude: number
+    longitude: number
+    accuracy?: number
+    capturedAt?: Date
   }
 }

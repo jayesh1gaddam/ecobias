@@ -42,6 +42,7 @@ export async function createUPIOrder(
         zipCode: "",
         country: "",
       },
+      orderLocation: orderType === "product" ? orderDetails.order_location : undefined,
     }
     const orderResponse = await fetch("/api/orders", {
       method: "POST",

@@ -105,6 +105,18 @@ export default function ProtectedCheckoutPage() {
     setIsProcessingOrder(true)
 
     try {
+      // Try to capture geolocation for precise order location
+      const geoPosition: { latitude?: number; longitude?: number; accuracy?: number } = {}
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          if (!navigator.geolocation) return reject(new Error("Geolocation not supported"))
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 5000 })
+        })
+        geoPosition.latitude = pos.coords.latitude
+        geoPosition.longitude = pos.coords.longitude
+        geoPosition.accuracy = pos.coords.accuracy
+      } catch {}
+
       await createUPIOrder(
         total,
         `Order from Luxury Perfumes - ${cartItems.length} items`,
@@ -122,6 +134,12 @@ export default function ProtectedCheckoutPage() {
           shipping: shipping,
           tax: tax,
           shipping_address: user.address,
+          order_location: geoPosition.latitude !== undefined && geoPosition.longitude !== undefined ? {
+            latitude: geoPosition.latitude,
+            longitude: geoPosition.longitude,
+            accuracy: geoPosition.accuracy,
+            capturedAt: new Date().toISOString(),
+          } : undefined,
         },
         (response: any) => {
           // Order created successfully, show payment modal
