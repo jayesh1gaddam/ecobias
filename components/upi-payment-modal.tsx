@@ -16,7 +16,7 @@ interface UPIPaymentModalProps {
   onPaymentComplete: () => void
 }
 
-const WHATSAPP_QR = "/images/whatsapp-qr-jayesh.png" // Place your WhatsApp QR image here
+const WHATSAPP_QR = "/images/new_wa_qr.jpg" // Updated WhatsApp QR image
 const WHATSAPP_NUMBER = "YOUR_NUMBER_HERE" // Optionally, use wa.me link
 
 export default function UPIPaymentModal({
