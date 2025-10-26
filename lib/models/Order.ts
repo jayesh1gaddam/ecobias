@@ -25,6 +25,7 @@ export interface Order {
   paymentVerified: boolean
   paymentVerifiedBy?: string // Admin ID who verified
   paymentVerifiedAt?: Date
+  couponCode: string // MANDATORY: Coupon code used for this order
   shippingAddress: {
     street: string
     city: string
@@ -50,6 +51,7 @@ export interface CreateOrderData {
   shipping: number
   tax: number
   total: number
+  couponCode: string // MANDATORY: Coupon code for order assignment
   shippingAddress: {
     street: string
     city: string

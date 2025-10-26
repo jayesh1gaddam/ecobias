@@ -15,6 +15,7 @@ interface Order {
   total: number
   status: string
   createdAt: string
+  couponCode: string
   paymentScreenshot?: string
   paymentVerified: boolean
   paymentVerifiedBy?: string
@@ -117,6 +118,7 @@ export default function AdminOrdersPage() {
                 <tr className="bg-gray-100">
                   <th className="p-2">User</th>
                   <th className="p-2">Phone</th>
+                  <th className="p-2">Coupon</th>
                   <th className="p-2">Address</th>
                   <th className="p-2">Items</th>
                   <th className="p-2">Total</th>
@@ -132,6 +134,9 @@ export default function AdminOrdersPage() {
                   <tr key={o._id} className="border-b">
                     <td className="p-2">{o.user?.name || "-"}<br /><span className="text-xs text-gray-500">{o.user?.email}</span></td>
                     <td className="p-2">{o.user?.phone || "-"}</td>
+                    <td className="p-2">
+                      <Badge className="bg-blue-600 text-white font-mono text-xs">{o.couponCode || "N/A"}</Badge>
+                    </td>
                     <td className="p-2 align-top">
                       {o.shippingAddress ? (
                         <div className="text-xs text-gray-700 leading-5">

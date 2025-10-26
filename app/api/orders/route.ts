@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
           items: order.items,
           total: order.total,
           status: order.status,
+          couponCode: order.couponCode, // Include coupon code
           createdAt: order.createdAt,
           shippingAddress: order.shippingAddress,
           orderLocation: order.orderLocation,
@@ -48,7 +49,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { userId, items, subtotal, shipping, tax, total, shippingAddress, orderLocation } = body
+    const { userId, items, subtotal, shipping, tax, total, couponCode, shippingAddress, orderLocation } = body
+
+    // MANDATORY: Validate coupon code
+    if (!couponCode || typeof couponCode !== "string" || couponCode.trim() === "") {
+      return NextResponse.json({ error: "Coupon code is required" }, { status: 400 })
+    }
+
+    // Validate coupon code exists and is active
+    const { SubAdminService } = await import("@/lib/services/subAdminService")
+    const subAdminService = new SubAdminService()
+    const isValidCoupon = await subAdminService.validateCoupon(couponCode.toUpperCase())
+
+    if (!isValidCoupon) {
+      return NextResponse.json({ error: "Invalid coupon code" }, { status: 400 })
+    }
 
     // Require a valid shipping address for all orders (product or membership)
     if (!shippingAddress ||
@@ -69,6 +84,7 @@ export async function POST(request: NextRequest) {
       shipping,
       tax,
       total,
+      couponCode: couponCode.toUpperCase(), // Store coupon code in uppercase
       shippingAddress,
       orderLocation,
     })

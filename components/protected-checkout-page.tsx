@@ -36,6 +36,9 @@ export default function ProtectedCheckoutPage() {
   const [userIsPremium, setUserIsPremium] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null)
+  const [couponCode, setCouponCode] = useState("")
+  const [isCouponValid, setIsCouponValid] = useState<boolean | null>(null)
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false)
 
   useEffect(() => {
     // Check authentication
@@ -63,6 +66,47 @@ export default function ProtectedCheckoutPage() {
   const tax = subtotal * 0.18 // 18% GST
   const total = subtotal + shipping + tax
 
+  const validateCoupon = async () => {
+    if (!couponCode || couponCode.trim() === "") {
+      setIsCouponValid(false)
+      return
+    }
+
+    setIsValidatingCoupon(true)
+    try {
+      const res = await fetch("/api/subadmin/validate-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ couponCode: couponCode.toUpperCase() }),
+      })
+      const data = await res.json()
+
+      if (data.valid) {
+        setIsCouponValid(true)
+        toast({
+          title: "Coupon Valid",
+          description: "Coupon code is valid and ready to use!",
+        })
+      } else {
+        setIsCouponValid(false)
+        toast({
+          title: "Invalid Coupon",
+          description: data.error || "Please enter a valid coupon code.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      setIsCouponValid(false)
+      toast({
+        title: "Validation Error",
+        description: "Could not validate coupon code. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsValidatingCoupon(false)
+    }
+  }
+
   const processOrder = async () => {
     if (!storeStatus.isOpen) {
       toast({
@@ -86,6 +130,16 @@ export default function ProtectedCheckoutPage() {
       toast({
         title: "Empty Cart",
         description: "Please add items to your cart before placing an order.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // MANDATORY: Check if coupon code is valid
+    if (!isCouponValid || !couponCode) {
+      toast({
+        title: "Coupon Required",
+        description: "Please enter and validate a coupon code to complete checkout.",
         variant: "destructive",
       })
       return
@@ -144,6 +198,7 @@ export default function ProtectedCheckoutPage() {
           subtotal: subtotal,
           shipping: shipping,
           tax: tax,
+          coupon_code: couponCode.toUpperCase(), // Include coupon code
           shipping_address: addr,
           order_location: geoPosition.latitude !== undefined && geoPosition.longitude !== undefined ? {
             latitude: geoPosition.latitude,
@@ -384,6 +439,54 @@ export default function ProtectedCheckoutPage() {
                         </div>
                       </div>
 
+                      <Separator />
+
+                      {/* MANDATORY Coupon Code Section */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-orange-600" />
+                          <p className="font-medium text-sm">Coupon Code Required</p>
+                          <Badge variant="destructive" className="text-xs">MANDATORY</Badge>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Enter your coupon code"
+                            value={couponCode}
+                            onChange={(e) => {
+                              setCouponCode(e.target.value.toUpperCase())
+                              setIsCouponValid(null)
+                            }}
+                            className="flex-1 px-3 py-2 border rounded-md text-sm uppercase"
+                            disabled={isProcessingOrder}
+                          />
+                          <Button
+                            onClick={validateCoupon}
+                            disabled={!couponCode || isValidatingCoupon || isProcessingOrder}
+                            size="sm"
+                            variant="outline"
+                          >
+                            {isValidatingCoupon ? "Checking..." : "Validate"}
+                          </Button>
+                        </div>
+                        {isCouponValid === true && (
+                          <Alert className="border-green-500 bg-green-50">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <AlertDescription className="text-green-700">
+                              Coupon code verified! You can proceed with your order.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                        {isCouponValid === false && couponCode && (
+                          <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                              Invalid coupon code. Please check and try again.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+
                       {/* Order Restrictions */}
                       {!storeStatus.isOpen && (
                         <Alert variant="destructive">
@@ -400,7 +503,7 @@ export default function ProtectedCheckoutPage() {
                         onClick={processOrder}
                         className="w-full"
                         size="lg"
-                        disabled={!storeStatus.isOpen || cartItems.length === 0 || isProcessingOrder}
+                        disabled={!storeStatus.isOpen || cartItems.length === 0 || isProcessingOrder || !isCouponValid}
                       >
                         {isProcessingOrder
                           ? "Processing Order..."
@@ -408,7 +511,9 @@ export default function ProtectedCheckoutPage() {
                             ? "Store Closed - Cannot Order"
                             : cartItems.length === 0
                               ? "Cart is Empty"
-                              : `Place Order - ₹${total.toLocaleString()}`}
+                              : !isCouponValid
+                                ? "Validate Coupon to Continue"
+                                : `Place Order - ₹${total.toLocaleString()}`}
                       </Button>
 
                       <div className="text-center">
