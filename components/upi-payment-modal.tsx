@@ -66,7 +66,6 @@ export default function UPIPaymentModal({
               alt="UPI QR Code"
               className="w-40 h-40 sm:w-48 sm:h-48 mx-auto rounded-lg border mb-2"
             />
-            <div className="text-xs sm:text-sm text-gray-600 mb-1">UPI ID: <span className="font-mono text-xs">{UPI_QR_CODE_DATA.upiId}</span></div>
             <div className="font-medium mb-1 text-sm">Amount: <span className="text-base sm:text-lg font-bold">₹{amount.toLocaleString()}</span></div>
             <div className="text-xs sm:text-sm text-gray-600 mb-1">{description}</div>
           </div>
