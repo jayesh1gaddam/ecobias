@@ -49,7 +49,7 @@ export default function UPIPaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <QrCode className="h-5 w-5" />
@@ -57,27 +57,27 @@ export default function UPIPaymentModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pb-4">
           {/* UPI QR Section */}
-          <div className="bg-gray-50 p-4 rounded-lg text-center">
-            <div className="font-semibold mb-2 text-purple-700">Step 1: Pay via UPI QR</div>
+          <div className="bg-gray-50 p-3 rounded-lg text-center">
+            <div className="font-semibold mb-2 text-purple-700 text-sm">Step 1: Pay via UPI QR</div>
             <img
               src={UPI_QR_CODE_DATA.qrCodeUrl}
               alt="UPI QR Code"
-              className="w-48 h-48 mx-auto rounded-lg border mb-2"
+              className="w-40 h-40 sm:w-48 sm:h-48 mx-auto rounded-lg border mb-2"
             />
-            <div className="text-sm text-gray-600 mb-2">UPI ID: <span className="font-mono">{UPI_QR_CODE_DATA.upiId}</span></div>
-            <div className="font-medium mb-2">Amount: <span className="text-lg font-bold">₹{amount.toLocaleString()}</span></div>
-            <div className="text-sm text-gray-600 mb-2">{description}</div>
+            <div className="text-xs sm:text-sm text-gray-600 mb-1">UPI ID: <span className="font-mono text-xs">{UPI_QR_CODE_DATA.upiId}</span></div>
+            <div className="font-medium mb-1 text-sm">Amount: <span className="text-base sm:text-lg font-bold">₹{amount.toLocaleString()}</span></div>
+            <div className="text-xs sm:text-sm text-gray-600 mb-1">{description}</div>
           </div>
 
           {/* WhatsApp QR Section */}
-          <div className="bg-gray-50 p-4 rounded-lg text-center">
-            <div className="font-semibold mb-2 text-green-700">Step 2: Send Payment Screenshot on WhatsApp</div>
+          <div className="bg-gray-50 p-3 rounded-lg text-center">
+            <div className="font-semibold mb-2 text-green-700 text-sm">Step 2: Send Payment Screenshot on WhatsApp</div>
             <img
               src={WHATSAPP_QR}
               alt="WhatsApp QR Code"
-              className="w-48 h-48 mx-auto rounded-lg border"
+              className="w-40 h-40 sm:w-48 sm:h-48 mx-auto rounded-lg border"
             />
           </div>
 
