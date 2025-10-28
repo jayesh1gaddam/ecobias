@@ -51,18 +51,26 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { userId, items, subtotal, shipping, tax, total, couponCode, shippingAddress, orderLocation } = body
 
-    // MANDATORY: Validate coupon code
-    if (!couponCode || typeof couponCode !== "string" || couponCode.trim() === "") {
-      return NextResponse.json({ error: "Coupon code is required" }, { status: 400 })
-    }
+    // Determine if this is a membership order (no items)
+    const isMembershipOrder = !items || items.length === 0
 
-    // Validate coupon code exists and is active
-    const { SubAdminService } = await import("@/lib/services/subAdminService")
-    const subAdminService = new SubAdminService()
-    const isValidCoupon = await subAdminService.validateCoupon(couponCode.toUpperCase())
+    // Check if order contains any premium products
+    const hasPremiumItems = !isMembershipOrder && items.some((item: any) => item.isPremium === true)
 
-    if (!isValidCoupon) {
-      return NextResponse.json({ error: "Invalid coupon code" }, { status: 400 })
+    // Coupon code is MANDATORY only for orders with premium products
+    if (hasPremiumItems) {
+      if (!couponCode || typeof couponCode !== "string" || couponCode.trim() === "") {
+        return NextResponse.json({ error: "Coupon code is required for premium product orders" }, { status: 400 })
+      }
+
+      // Validate coupon code exists and is active
+      const { SubAdminService } = await import("@/lib/services/subAdminService")
+      const subAdminService = new SubAdminService()
+      const isValidCoupon = await subAdminService.validateCoupon(couponCode.toUpperCase())
+
+      if (!isValidCoupon) {
+        return NextResponse.json({ error: "Invalid coupon code" }, { status: 400 })
+      }
     }
 
     // Require a valid shipping address for all orders (product or membership)
@@ -77,6 +85,16 @@ export async function POST(request: NextRequest) {
 
     const orderService = new OrderService()
 
+    // Determine the coupon code to use
+    let finalCouponCode: string
+    if (isMembershipOrder) {
+      finalCouponCode = "MEMBERSHIP" // Membership orders use "MEMBERSHIP"
+    } else if (hasPremiumItems) {
+      finalCouponCode = couponCode.toUpperCase() // Premium product orders use validated coupon
+    } else {
+      finalCouponCode = couponCode ? couponCode.toUpperCase() : "DIRECT" // Non-premium orders use provided coupon or "DIRECT"
+    }
+
     const order = await orderService.createOrder({
       userId: new ObjectId(userId),
       items,
@@ -84,7 +102,7 @@ export async function POST(request: NextRequest) {
       shipping,
       tax,
       total,
-      couponCode: couponCode.toUpperCase(), // Store coupon code in uppercase
+      couponCode: finalCouponCode,
       shippingAddress,
       orderLocation,
     })

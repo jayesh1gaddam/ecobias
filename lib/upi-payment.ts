@@ -35,14 +35,8 @@ export async function createUPIOrder(
       shipping: orderType === "product" ? orderDetails.shipping : 0,
       tax: orderType === "product" ? orderDetails.tax : 0,
       total: amount,
-      couponCode: orderDetails.coupon_code || "", // Include coupon code (mandatory for products)
-      shippingAddress: orderType === "product" ? orderDetails.shipping_address : {
-        street: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        country: "",
-      },
+      couponCode: orderDetails.coupon_code || "", // Include coupon code (mandatory for products, optional for membership)
+      shippingAddress: orderType === "membership" ? orderDetails.shipping_address : orderDetails.shipping_address,
       orderLocation: orderType === "product" ? orderDetails.order_location : undefined,
     }
     const orderResponse = await fetch("/api/orders", {
